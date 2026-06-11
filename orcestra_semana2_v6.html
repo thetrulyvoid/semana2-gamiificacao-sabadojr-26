@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orc'estra · SBJr 26 | Semana 2: Tapa na Cara</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Ubuntu:wght@400;500;700&family=Poppins:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F9F9F5; --bg2:#FFFDF0; --paper:#FFFFFF;
+  --ink:#1A4D1A;
+  --ink-soft:#4A6B45;
+  --green:#2EB600;
+  --green-med:#2E8B57;
+  --green-soft:#3CB371;
+  --line:rgba(26,77,26,.16);
+  --line-soft:rgba(26,77,26,.09);
+  --gold:#C8912F;
+  --rune:#7A8B3A;
+  --crisis:#C0492F;
+  --shadow:0 14px 40px rgba(26,77,26,.10);
+  --nav-h: 40px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;overflow-x:hidden;}
+body.locked{overflow:hidden;height:100vh;}
+
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(circle at 18% 22%,rgba(46,182,0,.05),transparent 38%),
+    radial-gradient(circle at 82% 12%,rgba(200,145,47,.05),transparent 34%),
+    radial-gradient(circle at 70% 88%,rgba(46,139,87,.05),transparent 40%);}
+
+#particles{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.65;}
+
+/* ─── CURSOR CUSTOM ─── */
+#custom-cursor{
+  position:fixed;width:28px;height:28px;pointer-events:none;z-index:99999;
+  transform:translate(-50%,-50%);transition:transform .1s;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.25));
+  display:none;
+}
+#cursor-ring{
+  position:fixed;width:44px;height:44px;border:1.5px solid rgba(46,139,87,.4);
+  border-radius:50%;pointer-events:none;z-index:99998;
+  transform:translate(-50%,-50%);transition:width .2s,height .2s;
+}
+body.is-guerreiro #cursor-ring{border-color:rgba(192,73,47,.55);}
+body.is-mago      #cursor-ring{border-color:rgba(124,77,180,.55);}
+body.is-ladino    #cursor-ring{border-color:rgba(31,111,106,.55);}
+.hovering #cursor-ring{width:56px;height:56px;}
+@media(hover:none){#custom-cursor,#cursor-ring{display:none!important;}}
+
+/* ─── CUTSCENE ─── */
+#cutscene{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;padding:2rem;overflow:hidden;
+  background:radial-gradient(ellipse 110% 90% at 50% 35%,#FFFFFF 0%,#F4F4EA 55%,#EDEEE0 100%);
+  transition:opacity .8s ease;}
+#cutscene.gone{opacity:0;pointer-events:none;}
+.cut-runes{position:absolute;inset:0;background-image:
+  linear-gradient(rgba(26,77,26,.04) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(26,77,26,.04) 1px,transparent 1px);
+  background-size:48px 48px;mask-image:radial-gradient(ellipse 70% 70% at 50% 45%,black 25%,transparent 100%);}
+.cut-mascot{width:104px;height:auto;filter:drop-shadow(0 8px 20px rgba(26,77,26,.18));
+  animation:bob 2.8s ease-in-out infinite;position:relative;z-index:2;}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-9px) rotate(2deg);}}
+.cut-eyebrow{position:relative;z-index:2;font-family:'Ubuntu',sans-serif;font-weight:700;
+  font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;color:var(--green-med);margin-top:1rem;}
+.cut-title{position:relative;z-index:2;font-family:'Unbounded',sans-serif;font-weight:900;
+  font-size:clamp(2.1rem,7vw,4.4rem);line-height:.95;color:var(--ink);margin-top:.4rem;text-transform:uppercase;}
+.cut-title .hit{color:var(--green);}
+.cut-prompt{position:relative;z-index:2;font-family:'Ubuntu',sans-serif;font-weight:500;
+  font-size:.95rem;color:var(--ink-soft);margin-top:1.4rem;}
+.class-grid{position:relative;z-index:2;display:flex;gap:1.2rem;margin-top:2.4rem;flex-wrap:wrap;justify-content:center;}
+.class-card{width:200px;background:var(--paper);border:1px solid var(--line);border-radius:18px;
+  padding:1.8rem 1.4rem;cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .2s;
+  position:relative;overflow:hidden;box-shadow:0 6px 20px rgba(26,77,26,.06);}
+.class-card::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(160deg,rgba(46,182,0,.06),transparent 60%);opacity:0;transition:opacity .25s;}
+.class-card:hover{transform:translateY(-6px);border-color:var(--green);box-shadow:0 16px 36px rgba(26,77,26,.14);}
+.class-card:hover::after{opacity:1;}
+.class-emoji{font-size:2.8rem;display:block;}
+.class-name{font-family:'Unbounded',sans-serif;font-weight:700;font-size:1.05rem;color:var(--ink);margin-top:.7rem;}
+.class-power{font-size:.74rem;color:var(--ink-soft);line-height:1.55;margin-top:.5rem;}
+.class-tag{display:inline-block;margin-top:.9rem;font-family:'Ubuntu',sans-serif;font-weight:700;
+  font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--green-med);
+  border:1px solid var(--line);border-radius:999px;padding:.2rem .7rem;}
+.cut-skip{position:relative;z-index:2;margin-top:1.8rem;font-family:'Ubuntu',sans-serif;font-weight:600;
+  font-size:.7rem;letter-spacing:.1em;color:var(--ink-soft);background:none;border:none;cursor:pointer;
+  text-decoration:underline;text-underline-offset:3px;opacity:.7;}
+.cut-skip:hover{color:var(--green);opacity:1;}
+
+/* ─── NAV SLIM ─── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  height:var(--nav-h);
+  background:rgba(249,249,245,.92);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line-soft);
+  padding:0 1.2rem;
+  display:flex;align-items:center;justify-content:space-between;gap:.6rem;
+}
+.nav-logo{
+  font-family:'Unbounded',sans-serif;font-weight:900;font-size:.7rem;
+  color:var(--ink);letter-spacing:.04em;white-space:nowrap;
+  display:flex;align-items:center;gap:.4rem;
+}
+.nav-logo span{color:var(--green);}
+.nav-logo .nav-week{
+  font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.6rem;
+  color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase;
+  border-left:1px solid var(--line);padding-left:.5rem;margin-left:.1rem;
+}
+.nav-right{display:flex;align-items:center;gap:.3rem;}
+.nav-pill{
+  font-family:'Ubuntu',sans-serif;font-size:.62rem;font-weight:700;
+  color:var(--ink-soft);letter-spacing:.06em;text-transform:uppercase;
+  padding:.22rem .6rem;border-radius:999px;border:1px solid transparent;
+  cursor:pointer;transition:all .2s;text-decoration:none;line-height:1;
+}
+.nav-pill:hover{color:var(--green);border-color:var(--line);}
+.nav-pill.forge{color:#fff;background:var(--green-med);border-color:transparent;}
+.nav-pill.forge:hover{background:var(--green);}
+.nav-class-badge{
+  display:inline-flex;align-items:center;gap:.3rem;
+  font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.6rem;
+  color:var(--ink);border:1px solid var(--line);border-radius:999px;
+  padding:.18rem .55rem;white-space:nowrap;line-height:1;
+}
+.nav-class-icon{width:16px;height:16px;display:inline-block;vertical-align:middle;}
+.sound-toggle{
+  font-size:.78rem;background:var(--paper);border:1px solid var(--line);
+  color:var(--green-med);width:24px;height:24px;border-radius:7px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;
+}
+.sound-toggle:hover{border-color:var(--green);color:var(--green);}
+.nav-sep{width:1px;height:14px;background:var(--line);margin:0 .1rem;}
+
+
+/* ─── STREAK FLOATER ─── */
+.streak-hud{
+  position:fixed;bottom:1.2rem;right:1.2rem;z-index:600;
+  background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  padding:.7rem 1rem;box-shadow:var(--shadow);
+  display:flex;flex-direction:column;align-items:center;gap:.2rem;
+  transition:all .3s;min-width:72px;
+}
+.streak-hud.hidden{opacity:0;pointer-events:none;transform:translateY(8px);}
+.streak-num{font-family:'Unbounded',sans-serif;font-weight:900;font-size:1.3rem;color:var(--green);line-height:1;}
+.streak-lbl{font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.52rem;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);}
+.streak-fire{font-size:.9rem;animation:fireShake .6s infinite;}
+@keyframes fireShake{0%,100%{transform:rotate(-5deg);}50%{transform:rotate(5deg);}}
+
+/* ─── TENSION BAR ─── */
+.tension-wrap{
+  position:fixed;left:0;top:var(--nav-h);bottom:0;width:4px;z-index:498;
+  background:transparent;pointer-events:none;
+}
+.tension-fill{
+  position:absolute;bottom:0;left:0;right:0;
+  background:linear-gradient(180deg,var(--crisis),#e87d2a,var(--gold));
+  transition:height .8s cubic-bezier(.16,1,.3,1);
+  border-radius:0 2px 2px 0;
+  opacity:.7;
+}
+
+/* ─── HERO ─── */
+.hero{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  padding:calc(var(--nav-h) + 4rem) 1.5rem 5rem;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.5rem;background:var(--paper);
+  border:1px solid var(--line);border-radius:999px;padding:.4rem 1.1rem;
+  font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.66rem;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--green-med);box-shadow:var(--shadow);animation:fadeUp .6s ease both;}
+.hero-eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+.hero h1{font-family:'Unbounded',sans-serif;font-weight:900;
+  font-size:clamp(2.6rem,10vw,7rem);line-height:.9;text-transform:uppercase;margin-top:1.4rem;
+  animation:fadeUp .7s .08s ease both;letter-spacing:-.01em;}
+.hero h1 .l1{color:var(--ink);display:block;}
+.hero h1 .l2{color:var(--green);display:block;}
+.hero-tag{font-family:'Ubuntu',sans-serif;font-weight:500;font-size:clamp(.95rem,2vw,1.2rem);
+  color:var(--ink-soft);margin-top:1.3rem;max-width:560px;line-height:1.5;animation:fadeUp .7s .16s ease both;}
+.hero-tag strong{color:var(--ink);font-weight:700;}
+.score-toggle{display:inline-flex;background:var(--paper);border:1px solid var(--line);
+  border-radius:14px;padding:.3rem;margin-top:2.2rem;box-shadow:var(--shadow);animation:fadeUp .7s .24s ease both;}
+.score-toggle button{font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.72rem;
+  letter-spacing:.04em;color:var(--ink-soft);background:none;border:none;
+  padding:.7rem 1.3rem;border-radius:10px;cursor:pointer;transition:all .2s;}
+.score-toggle button.active{background:var(--green);color:#fff;}
+.hero-score{margin-top:1.6rem;animation:fadeUp .7s .3s ease both;}
+.hero-score-num{font-family:'Unbounded',sans-serif;font-weight:900;
+  font-size:clamp(3.4rem,9vw,6.4rem);line-height:1;color:var(--green);}
+.hero-score-lbl{font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.66rem;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);margin-top:.3rem;}
+.hero-score-lbl b{color:var(--gold);}
+.hero-cta{display:flex;gap:.7rem;flex-wrap:wrap;justify-content:center;
+  margin-top:2.2rem;animation:fadeUp .7s .36s ease both;}
+.btn-primary{display:inline-flex;align-items:center;gap:.5rem;
+  font-family:'Unbounded',sans-serif;font-weight:700;font-size:.76rem;letter-spacing:.04em;
+  color:#fff;background:var(--green);border:none;padding:.85rem 1.6rem;border-radius:12px;
+  cursor:pointer;text-transform:uppercase;text-decoration:none;
+  transition:transform .15s,box-shadow .2s;box-shadow:0 8px 22px rgba(46,182,0,.22);}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(46,182,0,.34);}
+.btn-ghost{display:inline-flex;align-items:center;gap:.5rem;font-family:'Ubuntu',sans-serif;
+  font-weight:700;font-size:.76rem;letter-spacing:.04em;color:var(--green-med);background:var(--paper);
+  border:1px solid var(--line);padding:.85rem 1.6rem;border-radius:12px;cursor:pointer;
+  text-transform:uppercase;text-decoration:none;transition:all .2s;}
+.btn-ghost:hover{border-color:var(--green);color:var(--green);}
+
+/* ─── SECTIONS ─── */
+section.sec{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:4.5rem 1.5rem;}
+.sec-eyebrow{font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.66rem;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--green-med);margin-bottom:.5rem;}
+.sec-title{font-family:'Unbounded',sans-serif;font-weight:700;
+  font-size:clamp(1.5rem,4vw,2.5rem);line-height:1.1;color:var(--ink);margin-bottom:.8rem;}
+.sec-title em{color:var(--green);font-style:normal;}
+.sec-intro{font-size:.9rem;color:var(--ink-soft);line-height:1.65;max-width:640px;margin-bottom:2.6rem;}
+.divider{max-width:1080px;margin:0 auto;height:1px;
+  background:linear-gradient(90deg,transparent,var(--line),transparent);position:relative;z-index:1;}
+
+/* ─── QUEST BOARD ─── */
+.tier-label{font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.64rem;
+  color:var(--ink-soft);letter-spacing:.16em;text-transform:uppercase;
+  margin:1.8rem 0 .7rem;display:flex;align-items:center;gap:.7rem;}
+.tier-label:first-of-type{margin-top:0;}
+.tier-label .pts{color:var(--green-med);}
+.tier-label::after{content:'';flex:1;height:1px;background:var(--line-soft);}
+.quest-grid{display:grid;gap:.9rem;}
+.quest-card{
+  background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  padding:1.3rem 1.5rem;display:grid;grid-template-columns:58px 1fr auto;
+  gap:1.1rem;align-items:center;transition:transform .2s,box-shadow .2s,border-color .2s;
+  position:relative;overflow:hidden;
+}
+.quest-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--green),var(--green-soft));
+  transform:scaleY(0);transition:transform .3s;transform-origin:bottom;}
+.quest-card:hover{transform:translateY(-3px);box-shadow:var(--shadow);}
+.quest-card:hover::before{transform:scaleY(1);}
+.quest-card.done{border-color:rgba(46,182,0,.35);background:rgba(46,182,0,.03);}
+.quest-card.done::before{transform:scaleY(1);opacity:.5;}
+.q-gem{display:flex;flex-direction:column;align-items:center;gap:.25rem;}
+.q-gem .ic{font-size:1.5rem;}
+.q-gem .pt{font-family:'Unbounded',sans-serif;font-weight:900;font-size:.72rem;color:var(--green-med);}
+.q-body h3{font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.96rem;
+  color:var(--ink);margin-bottom:.25rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;}
+.q-code{font-family:'Unbounded',sans-serif;font-weight:700;font-size:.6rem;color:var(--green);
+  background:rgba(46,182,0,.08);border-radius:5px;padding:.1rem .4rem;}
+.q-body p{font-size:.78rem;color:var(--ink-soft);line-height:1.55;}
+.q-actions{display:flex;flex-direction:column;align-items:flex-end;gap:.45rem;min-width:130px;}
+.btn-view{display:inline-flex;align-items:center;gap:.35rem;padding:.34rem .8rem;border-radius:8px;
+  background:rgba(46,139,87,.1);border:1px solid var(--line);color:var(--green-med);
+  font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.68rem;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.btn-view:hover{background:rgba(46,182,0,.14);border-color:var(--green);color:var(--green);}
+.btn-check{display:inline-flex;align-items:center;gap:.3rem;padding:.3rem .7rem;border-radius:8px;
+  background:transparent;border:1px dashed var(--line);color:var(--ink-soft);
+  font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.64rem;cursor:pointer;transition:all .2s;}
+.btn-check:hover{border-color:var(--green-med);color:var(--green-med);}
+.btn-check.checked{background:rgba(46,182,0,.1);border-color:var(--green);color:var(--green);border-style:solid;}
+.btn-link,.btn-dl{display:inline-flex;align-items:center;gap:.35rem;padding:.34rem .8rem;
+  border-radius:8px;font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.66rem;
+  cursor:pointer;text-decoration:none;transition:all .2s;white-space:nowrap;
+  border:1px dashed var(--line);background:transparent;color:var(--ink-soft);}
+.btn-link.ready,.btn-dl.ready{color:#fff;background:var(--green-med);border-style:solid;border-color:var(--green-med);}
+.btn-link.ready:hover,.btn-dl.ready:hover{background:var(--green);border-color:var(--green);}
+.btn-link.pending,.btn-dl.pending{opacity:.55;cursor:not-allowed;}
+
+/* ─── SEGREDOS DE CLASSE ─── */
+.secret{transition:all .25s;}
+
+/* GUERREIRO */
+.verdades{display:grid;gap:.8rem;margin-top:.5rem;}
+.censored{position:relative;background:var(--paper);border:1px solid var(--line);
+  border-radius:12px;padding:1.1rem 1.3rem;display:flex;align-items:center;gap:1rem;}
+.censored .bar{flex:1;position:relative;}
+.censored .truth{font-family:'Ubuntu',sans-serif;font-weight:500;font-size:.86rem;
+  color:var(--ink);line-height:1.5;transition:opacity .4s;}
+.censored .redact{position:absolute;inset:-2px -4px;
+  background:repeating-linear-gradient(110deg,#21331c,#21331c 12px,#2c3f24 12px,#2c3f24 24px);
+  border-radius:6px;transition:transform .45s cubic-bezier(.7,0,.3,1),opacity .4s;transform-origin:left;}
+.censored.cut .redact{transform:scaleX(0);opacity:0;}
+.cut-btn{flex-shrink:0;font-size:1.1rem;width:40px;height:40px;border-radius:10px;
+  border:1px solid var(--line);background:var(--bg2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;opacity:.4;}
+.censored .lbl{font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.58rem;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:.4rem;}
+body.is-guerreiro .cut-btn{
+  opacity:1;border-color:var(--crisis);color:var(--crisis);
+  box-shadow:0 0 0 0 rgba(192,73,47,.4);animation:swordpulse 2s infinite;
+}
+body.is-guerreiro .cut-btn:hover{background:var(--crisis);color:#fff;transform:rotate(-12deg) scale(1.08);}
+@keyframes swordpulse{0%,100%{box-shadow:0 0 0 0 rgba(192,73,47,.35);}50%{box-shadow:0 0 0 7px rgba(192,73,47,0);}}
+
+/* rage meter - Guerreiro */
+.rage-meter{
+  margin-top:1.4rem;background:var(--paper);border:1px solid var(--line);
+  border-radius:12px;padding:1rem 1.3rem;display:none;
+}
+body.is-guerreiro .rage-meter{display:block;}
+.rage-label{font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.64rem;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--crisis);margin-bottom:.5rem;
+  display:flex;align-items:center;justify-content:space-between;}
+.rage-track{height:8px;background:rgba(192,73,47,.12);border-radius:999px;overflow:hidden;}
+.rage-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--crisis));
+  border-radius:999px;width:0%;transition:width .5s cubic-bezier(.16,1,.3,1);}
+.rage-msg{font-size:.76rem;color:var(--ink-soft);margin-top:.5rem;min-height:1.2em;transition:all .3s;}
+
+/* MAGO */
+.grimorio{display:inline-flex;align-items:center;gap:.6rem;font-family:'Ubuntu',sans-serif;
+  font-weight:700;font-size:.74rem;color:var(--ink-soft);background:var(--paper);
+  border:1px dashed var(--line);border-radius:12px;padding:.7rem 1.1rem;cursor:pointer;transition:all .25s;}
+.grimorio .orb{font-size:1.2rem;}
+body.is-mago .grimorio{color:#5a3b8a;border-style:solid;border-color:rgba(124,77,180,.45);
+  background:rgba(124,77,180,.06);box-shadow:0 0 0 0 rgba(124,77,180,.4);animation:magopulse 2.2s infinite;}
+body.is-mago .grimorio:hover{background:rgba(124,77,180,.14);transform:translateY(-2px);}
+@keyframes magopulse{0%,100%{box-shadow:0 0 0 0 rgba(124,77,180,.3);}50%{box-shadow:0 0 0 7px rgba(124,77,180,0);}}
+
+/* círculo mágico (Mago) */
+.magic-circle-wrap{
+  margin-bottom:1.8rem;display:none;flex-direction:column;align-items:center;gap:.75rem;
+}
+body.is-mago .magic-circle-wrap{display:flex;}
+.magic-circle{
+  width:90px;height:90px;border-radius:50%;position:relative;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  user-select:none;-webkit-user-select:none;touch-action:none;
+}
+.magic-circle::before{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  border:2.5px solid rgba(124,77,180,.22);
+  animation:magopulse 2.2s infinite;
+}
+.mc-ring{
+  position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(rgba(124,77,180,.72) var(--mc-p,0deg),rgba(124,77,180,.1) var(--mc-p,0deg));
+  transition:none;
+}
+.mc-bg{position:absolute;inset:7px;border-radius:50%;background:rgba(124,77,180,.07);}
+.mc-icon{position:relative;z-index:2;font-size:2.1rem;transition:transform .18s;}
+.magic-circle:hover .mc-icon{transform:scale(1.1);}
+.magic-circle:active .mc-icon{transform:scale(.92);}
+.mc-label{font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.7rem;
+  color:#6a4bb0;text-align:center;max-width:220px;opacity:.85;}
+.mc-hint{font-size:.63rem;color:#8a6bb0;opacity:.6;}
+
+/* LADINO */
+.spy{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;
+  border-radius:50%;font-size:.8rem;cursor:pointer;vertical-align:middle;opacity:.22;
+  transition:all .25s;border:1px solid transparent;}
+body.is-ladino .spy{opacity:1;color:#1f6f6a;border-color:rgba(31,111,106,.4);
+  background:rgba(31,111,106,.08);box-shadow:0 0 0 0 rgba(31,111,106,.4);animation:ladinopulse 2.4s infinite;}
+body.is-ladino .spy:hover{background:rgba(31,111,106,.18);transform:scale(1.15);}
+@keyframes ladinopulse{0%,100%{box-shadow:0 0 0 0 rgba(31,111,106,.3);}50%{box-shadow:0 0 0 6px rgba(31,111,106,0);}}
+
+/* cooldown do Ladino */
+.spy.cooling{animation:none!important;opacity:.5!important;pointer-events:none;}
+.spy .cd-arc{
+  position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(transparent var(--cdp,0%),rgba(31,111,106,.3) var(--cdp,0%));
+}
+
+/* dados ocultos extras do Ladino */
+.hidden-data{
+  margin-top:1.4rem;background:var(--paper);border:1px dashed rgba(31,111,106,.3);
+  border-radius:12px;overflow:hidden;
+}
+.hidden-row{
+  display:flex;align-items:center;gap:.7rem;padding:.8rem 1.1rem;
+  border-bottom:1px solid rgba(31,111,106,.1);transition:background .2s;
+  cursor:pointer;
+}
+.hidden-row:last-child{border-bottom:none;}
+body.is-ladino .hidden-row:hover{background:rgba(31,111,106,.05);}
+.hidden-row .hd-icon{font-size:1rem;opacity:.5;transition:opacity .2s;}
+body.is-ladino .hidden-row .hd-icon{opacity:1;}
+.hidden-row .hd-label{flex:1;font-size:.78rem;color:var(--ink-soft);}
+.hidden-row .hd-val{font-family:'Unbounded',sans-serif;font-weight:700;font-size:.72rem;
+  color:var(--ink);filter:blur(6px);transition:filter .4s;}
+body.is-ladino .hidden-row:hover .hd-val{filter:blur(0);}
+.hidden-row .hd-lock{font-size:.7rem;opacity:.4;}
+body.is-ladino .hidden-row .hd-lock{opacity:0;}
+
+/* animações de habilidade */
+.censored .slash{position:absolute;left:-6px;right:-6px;top:50%;height:3px;border-radius:3px;
+  background:linear-gradient(90deg,transparent,#fff 18%,#fff 82%,transparent);
+  transform:scaleX(0);opacity:0;pointer-events:none;}
+.censored.cut .slash{animation:slashSweep .5s cubic-bezier(.7,0,.3,1);}
+@keyframes slashSweep{0%{transform:scaleX(0);opacity:0;}45%{transform:scaleX(1);opacity:1;}100%{transform:scaleX(1.03);opacity:0;}}
+.censored.cut{animation:shakeX .32s ease;}
+@keyframes shakeX{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.censored.cut .truth{animation:truthIn .55s ease both;}
+@keyframes truthIn{from{opacity:.12;letter-spacing:-1.5px;filter:blur(2px);}to{opacity:1;letter-spacing:normal;filter:none;}}
+.cut-btn.pop,.grimorio.pop,.spy.pop{animation:popz .42s ease;}
+@keyframes popz{0%{transform:scale(1);}42%{transform:scale(1.4);}100%{transform:scale(1);}}
+.grimorio.cast{animation:castBurst .6s ease;}
+@keyframes castBurst{0%{box-shadow:0 0 0 0 rgba(124,77,180,.55);}100%{box-shadow:0 0 0 26px rgba(124,77,180,0);}}
+.spark{position:fixed;width:9px;height:9px;border-radius:50%;pointer-events:none;z-index:9002;}
+.popover{position:fixed;z-index:9001;max-width:280px;background:#13332e;color:#eaf5ec;
+  font-family:'Poppins',sans-serif;font-size:.78rem;line-height:1.55;padding:.8rem 1rem;
+  border-radius:12px;box-shadow:0 14px 34px rgba(0,0,0,.3);border:1px solid rgba(31,111,106,.5);
+  opacity:0;transform:translateY(8px) scale(.95);transition:all .25s cubic-bezier(.16,1,.3,1);pointer-events:none;}
+.popover.show{opacity:1;transform:none;}
+.popover::after{content:'';position:absolute;left:18px;bottom:-7px;width:0;height:0;
+  border:7px solid transparent;border-top-color:#13332e;border-bottom:0;}
+#toast{position:fixed;bottom:1.4rem;left:50%;transform:translateX(-50%) translateY(20px);
+  z-index:9000;background:var(--ink);color:var(--bg2);font-family:'Ubuntu',sans-serif;
+  font-weight:600;font-size:.82rem;padding:.8rem 1.3rem;border-radius:12px;
+  box-shadow:0 14px 30px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:all .3s;
+  max-width:90vw;text-align:center;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ─── FORJA ─── */
+.forge{background:linear-gradient(180deg,var(--bg2),var(--paper));
+  border:1px solid var(--line);border-radius:22px;padding:2.6rem 2.2rem;
+  position:relative;overflow:hidden;box-shadow:var(--shadow);}
+.forge::before{content:'';position:absolute;inset:0;
+  background-image:radial-gradient(circle at 50% -10%,rgba(200,145,47,.10),transparent 45%);pointer-events:none;}
+.forge::after{content:'';position:absolute;left:0;right:0;top:0;height:3px;
+  background:linear-gradient(90deg,transparent,var(--gold),var(--green),transparent);}
+.forge-inner{position:relative;z-index:1;}
+.forge-head{display:flex;align-items:center;gap:.9rem;margin-bottom:.5rem;}
+.forge-emoji{font-size:2.1rem;}
+.forge-head h3{font-family:'Unbounded',sans-serif;font-weight:900;font-size:1.2rem;color:var(--ink);}
+.forge-sub{font-size:.84rem;color:var(--ink-soft);line-height:1.6;max-width:600px;margin-bottom:2rem;}
+.dilemmas{display:grid;gap:1.1rem;}
+.dilemma{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:1.4rem 1.5rem;}
+.dilemma-q{display:flex;align-items:center;gap:.7rem;font-family:'Ubuntu',sans-serif;
+  font-weight:700;font-size:.98rem;color:var(--ink);margin-bottom:1rem;}
+.dilemma-q .rune{width:30px;height:30px;border-radius:8px;background:rgba(46,139,87,.1);
+  display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.postures{display:flex;gap:.6rem;flex-wrap:wrap;}
+.posture{font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.78rem;color:var(--ink);
+  background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:.6rem 1.1rem;
+  cursor:pointer;transition:all .2s;}
+.posture:hover{border-color:var(--green);background:rgba(46,182,0,.06);transform:translateY(-1px);}
+.posture.act{border-color:var(--green-med);}
+.posture.chosen{background:var(--ink);color:var(--bg2);border-color:var(--ink);}
+.posture.dim{opacity:.4;}
+.consequence{margin-top:1rem;font-size:.82rem;line-height:1.65;color:var(--ink);
+  background:var(--bg2);border-left:3px solid var(--green-med);border-radius:0 10px 10px 0;
+  padding:.9rem 1.1rem;display:none;}
+.consequence.show{display:block;animation:fadeUp .35s ease both;}
+.consequence.cost{border-left-color:var(--crisis);}
+.consequence .cost-tag{font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.62rem;
+  letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:.5rem;}
+.consequence.cost .cost-tag{color:var(--crisis);}
+.consequence.win .cost-tag{color:var(--green-med);}
+.forge-foot{margin-top:2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.forge-progress{font-family:'Ubuntu',sans-serif;font-weight:600;font-size:.78rem;color:var(--ink-soft);}
+.forge-progress b{color:var(--green-med);font-family:'Unbounded',sans-serif;}
+.btn-commit{font-family:'Unbounded',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:.04em;
+  color:#fff;background:var(--gold);border:none;padding:.9rem 1.6rem;border-radius:12px;
+  cursor:pointer;text-transform:uppercase;transition:all .2s;opacity:.5;pointer-events:none;}
+.btn-commit.ready{opacity:1;pointer-events:auto;box-shadow:0 8px 22px rgba(200,145,47,.3);}
+.btn-commit.ready:hover{transform:translateY(-2px);background:#b27e22;}
+
+/* ─── PLACAR ─── */
+.score-panel{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:2.4rem;
+  display:flex;flex-wrap:wrap;gap:1.6rem 2rem;align-items:center;justify-content:space-between;box-shadow:var(--shadow);}
+.sp-main .n{font-family:'Unbounded',sans-serif;font-weight:900;
+  font-size:clamp(2.8rem,7vw,5rem);color:var(--green);line-height:1;}
+.sp-main .l{font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.64rem;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-top:.2rem;}
+.sp-stat{text-align:center;}
+.sp-stat .n{font-family:'Unbounded',sans-serif;font-weight:900;font-size:1.8rem;color:var(--ink);line-height:1;}
+.sp-stat .l{font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.56rem;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-top:.25rem;}
+.sp-sep{width:1px;height:46px;background:var(--line);}
+.bonus-banner{margin-top:1.2rem;display:flex;align-items:center;gap:.7rem;
+  background:rgba(200,145,47,.08);border:1px solid rgba(200,145,47,.35);border-radius:14px;
+  padding:.9rem 1.3rem;font-size:.82rem;color:var(--ink);line-height:1.5;}
+.bonus-banner .big{font-family:'Unbounded',sans-serif;font-weight:900;color:var(--gold);font-size:1.1rem;white-space:nowrap;}
+
+/* ─── MODAL ─── */
+.overlay{position:fixed;inset:0;background:rgba(26,40,20,.45);backdrop-filter:blur(6px);
+  z-index:8000;display:flex;align-items:center;justify-content:center;padding:1.4rem;
+  opacity:0;pointer-events:none;transition:opacity .3s;}
+.overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--paper);border:1px solid var(--line);border-radius:20px;
+  max-width:640px;width:100%;max-height:84vh;overflow-y:auto;padding:2.2rem 2.4rem;
+  transform:translateY(18px) scale(.98);transition:transform .35s cubic-bezier(.16,1,.3,1),opacity .3s;
+  opacity:0;position:relative;box-shadow:0 30px 70px rgba(26,77,26,.25);}
+.overlay.open .modal{transform:none;opacity:1;}
+.modal-close{position:absolute;top:1rem;right:1.2rem;width:30px;height:30px;border-radius:50%;
+  background:var(--bg);border:1px solid var(--line);color:var(--ink);font-size:1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.modal-close:hover{background:var(--green);color:#fff;border-color:var(--green);}
+.modal-tag{display:inline-block;font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.6rem;
+  letter-spacing:.16em;text-transform:uppercase;color:#fff;background:var(--green-med);
+  padding:.2rem .6rem;border-radius:5px;margin-bottom:.9rem;}
+.modal h2{font-family:'Unbounded',sans-serif;font-weight:700;font-size:1.2rem;
+  color:var(--ink);margin-bottom:1.1rem;line-height:1.25;}
+.modal-body{font-size:.86rem;color:var(--ink-soft);line-height:1.75;}
+.modal-body p{margin-bottom:.9rem;}
+.modal-body strong{color:var(--ink);font-weight:600;}
+.modal-pending{background:var(--bg2);border:1px dashed var(--line);border-radius:12px;
+  padding:1rem 1.2rem;font-size:.82rem;color:var(--ink-soft);margin-bottom:1.1rem;display:flex;gap:.6rem;align-items:flex-start;}
+.modal-spec{background:var(--bg);border-radius:12px;padding:1rem 1.2rem;font-size:.8rem;}
+.modal-spec .k{font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.6rem;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--green-med);display:block;margin-bottom:.3rem;}
+.commit-area{width:100%;min-height:150px;font-family:'Poppins',sans-serif;font-size:.88rem;
+  line-height:1.7;color:var(--ink);background:var(--bg2);border:1px solid var(--line);
+  border-radius:12px;padding:1rem 1.2rem;resize:vertical;margin:.4rem 0 1rem;}
+.commit-area:focus{outline:none;border-color:var(--green);}
+.btn-copy{font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.76rem;color:#fff;
+  background:var(--green);border:none;padding:.7rem 1.4rem;border-radius:10px;cursor:pointer;transition:all .2s;}
+.btn-copy:hover{background:var(--green-med);}
+
+/* ─── FOOTER ─── */
+footer{position:relative;z-index:1;text-align:center;padding:3.5rem 1.5rem 4rem;
+  border-top:1px solid var(--line-soft);margin-top:2rem;}
+.foot-mark{font-family:'Unbounded',sans-serif;font-weight:900;font-size:1.7rem;color:var(--ink);letter-spacing:.04em;}
+.foot-mark span{color:var(--green);}
+.foot-grito{font-family:'Unbounded',sans-serif;font-weight:700;font-size:.95rem;color:var(--green-med);margin-top:.8rem;letter-spacing:.05em;}
+.reincarnate{margin-top:1.8rem;display:inline-flex;align-items:center;gap:.5rem;
+  font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--green-med);background:var(--paper);border:1px solid var(--line);
+  border-radius:999px;padding:.6rem 1.3rem;cursor:pointer;transition:all .2s;}
+.reincarnate:hover{border-color:var(--green);color:var(--green);transform:translateY(-1px);}
+.foot-note{margin-top:1.6rem;font-size:.68rem;color:var(--ink-soft);opacity:.7;}
+
+/* ─── MISC ─── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:none;}}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease;}
+.reveal.visible{opacity:1;transform:none;}
+.r1{transition-delay:.08s;}.r2{transition-delay:.16s;}.r3{transition-delay:.24s;}
+
+@media(max-width:640px){
+  .quest-card{grid-template-columns:44px 1fr;}
+  .q-actions{grid-column:2;align-items:flex-start;flex-direction:row;flex-wrap:wrap;}
+  .score-panel{flex-direction:column;text-align:center;}
+  .sp-sep{display:none;}
+  .forge{padding:1.8rem 1.3rem;}
+  nav{padding:0 .8rem;}
+  .nav-pill:not(.forge){display:none;}
+  .streak-hud{bottom:.6rem;right:.6rem;padding:.5rem .7rem;}
+}
+
+/* ─── CUTSCENE 2 ─── */
+#cutscene2{
+  position:fixed;inset:0;z-index:10001;display:none;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;padding:2rem;overflow:hidden;
+  background:radial-gradient(ellipse 110% 90% at 50% 35%,#FFFFFF 0%,#F4F4EA 55%,#EDEEE0 100%);
+  opacity:0;transition:opacity .6s ease;
+}
+.cut2-emoji{font-size:3.8rem;animation:bob 2.8s ease-in-out infinite;
+  position:relative;z-index:2;margin-bottom:.4rem;}
+.cut2-week{position:relative;z-index:2;font-family:'Ubuntu',sans-serif;font-weight:700;
+  font-size:.64rem;letter-spacing:.3em;text-transform:uppercase;color:var(--green-med);margin-bottom:.3rem;}
+.cut2-title{position:relative;z-index:2;font-family:'Unbounded',sans-serif;font-weight:900;
+  font-size:clamp(1.8rem,5.5vw,3.2rem);line-height:1.05;text-transform:uppercase;
+  color:var(--ink);margin-top:.2rem;}
+.cut2-title .hit{color:var(--green);}
+.cut2-desc{position:relative;z-index:2;font-family:'Poppins',sans-serif;
+  font-size:clamp(.82rem,1.8vw,.95rem);color:var(--ink-soft);line-height:1.7;
+  max-width:460px;margin-top:1.1rem;}
+.cut2-context{position:relative;z-index:2;font-family:'Ubuntu',sans-serif;font-weight:500;
+  font-size:clamp(.78rem,1.6vw,.87rem);color:var(--ink);line-height:1.65;
+  background:var(--paper);border:1px solid var(--line);border-radius:12px;
+  padding:.8rem 1.4rem;margin-top:1rem;max-width:420px;}
+.cut2-btn{position:relative;z-index:2;margin-top:1.8rem;}
+</style>
+</head>
+<body class="locked">
+
+<!-- CUTSCENE -->
+<div id="cutscene">
+  <div class="cut-runes"></div>
+  <img class="cut-mascot" src='./main-removebg-preview.png' alt="Mascote Orc'estra">
+  <div class="cut-eyebrow">Orc'estra · SBJr 26</div>
+  <h1 class="cut-title"><span>Semana 2</span><br><span class="hit">Tapa na Cara</span></h1>
+  <p class="cut-prompt">Escolha sua classe para revelar seus poderes especiais</p>
+  <div class="class-grid">
+    <div class="class-card" onclick="chooseClass('guerreiro')">
+      <span class="class-emoji">⚔️</span>
+      <div class="class-name">Guerreiro</div>
+      <div class="class-power">Corta as verdades censuradas. Cada tapa revela o que a EJ esconde de si mesma.</div>
+      <span class="class-tag">Poder: Golpe da Verdade</span>
+    </div>
+    <div class="class-card" onclick="chooseClass('mago')">
+      <span class="class-emoji">🔮</span>
+      <div class="class-name">Mago</div>
+      <div class="class-power">Carrega mana com ações e lança o Ritual da Visão para revelar entregas prontas.</div>
+      <span class="class-tag">Poder: Ritual da Visão</span>
+    </div>
+    <div class="class-card" onclick="chooseClass('ladino')">
+      <span class="class-emoji">🗝️</span>
+      <div class="class-name">Ladino</div>
+      <div class="class-power">Encontra dados ocultos, feedbacks escondidos e segredos que outros não conseguem ver.</div>
+      <span class="class-tag">Poder: Olhar Furtivo</span>
+    </div>
+  </div>
+  <button class="cut-skip" onclick="chooseClass('guerreiro',true)">entrar sem escolher →</button>
+</div>
+
+<!-- CUTSCENE 2 -->
+<div id="cutscene2">
+  <div class="cut-runes"></div>
+  <div class="cut2-emoji" id="cut2Emoji">🔮</div>
+  <div class="cut2-week">Orc'estra · SBJr 26 · Semana 2</div>
+  <h2 class="cut2-title">Tapa<br><span class="hit">na Cara</span></h2>
+  <p class="cut2-desc" id="cut2Desc">Descrição da classe.</p>
+  <div class="cut2-context">
+    Antes de crescer, precisamos encarar onde travamos.<br>
+    <strong>Sem desculpa. Sem rodeio. É hora de agir.</strong>
+  </div>
+  <button class="btn-primary cut2-btn" onclick="startGame()">⚔ Começar a semana</button>
+</div>
+
+<!-- CURSOR CUSTOM -->
+<div id="custom-cursor">
+  <svg id="cursor-svg" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+<div id="cursor-ring"></div>
+<canvas id="particles"></canvas>
+<div id="toast"></div>
+
+<!-- TENSION BAR -->
+<div class="tension-wrap"><div class="tension-fill" id="tensionFill" style="height:0%"></div></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    ⚔ ORC'<span>ESTRA</span>
+    <span class="nav-week">Semana 2</span>
+  </div>
+  <div class="nav-right">
+    <a href="#missoes" class="nav-pill">Missões</a>
+    <div class="nav-sep"></div>
+    <a href="#forja" class="nav-pill forge">🔨 Forja</a>
+    <div class="nav-sep"></div>
+    <a href="#placar" class="nav-pill">Placar</a>
+    <div class="nav-sep"></div>
+    <span class="nav-class-badge" id="navClass">
+      <svg class="nav-class-icon" id="navClassIcon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"></svg>
+      <span id="navClassName">Classe</span>
+    </span>
+    <button class="sound-toggle" id="soundToggle" title="Tocar o hino da Orc'estra">🔊</button>
+  </div>
+</nav>
+
+
+<!-- STREAK HUD -->
+<div class="streak-hud hidden" id="streakHud">
+  <span class="streak-fire">🔥</span>
+  <div class="streak-num" id="streakNum">0</div>
+  <div class="streak-lbl">missões<br>marcadas</div>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="topo">
+  <div class="hero-eyebrow"><span class="dot"></span>Pilar da Semana · Encare a realidade</div>
+  <h1><span class="l1">Tapa</span><span class="l2">na Cara</span></h1>
+  <p class="hero-tag">Antes de crescer, é preciso encarar onde a gente trava. Sem desculpa, sem rodeio. <strong>Esta é a semana de agir.</strong></p>
+  <div class="score-toggle" id="scoreToggle">
+    <button class="active" data-mode="base">Base · 1050</button>
+    <button data-mode="bonus">Com bônus · 2100</button>
+  </div>
+  <div class="hero-score">
+    <div class="hero-score-num" id="heroScore">0</div>
+    <div class="hero-score-lbl" id="heroScoreLbl">pontos máximos · 11 missões</div>
+  </div>
+  <div class="hero-cta">
+    <a href="#missoes" class="btn-primary">⚔ Ver as missões</a>
+    <a href="#forja" class="btn-ghost">🔨 Entrar na Forja</a>
+  </div>
+</section>
+
+<!-- MISSÕES -->
+<div class="divider"></div>
+<section class="sec" id="missoes">
+  <p class="sec-eyebrow reveal">📜 Quadro de Missões</p>
+  <h2 class="sec-title reveal r1">11 missões.<br><em>Zero desculpas.</em></h2>
+  <p class="sec-intro reveal r2">
+    Missões divididas em três níveis de impacto. Marque como feita para acompanhar o progresso da EJ em tempo real.
+  </p>
+
+  <!-- círculo mágico (Mago) -->
+  <div class="magic-circle-wrap reveal r2">
+    <div class="magic-circle" id="magicCircle">
+      <div class="mc-ring" id="mcRing"></div>
+      <div class="mc-bg"></div>
+      <span class="mc-icon">🔮</span>
+    </div>
+    <div class="mc-label">Segure o círculo para invocar a Visão</div>
+    <div class="mc-hint">Grimório dos Rascunhos · poder do Mago</div>
+  </div>
+
+  <div class="quest-grid reveal r3" id="questGrid"></div>
+</section>
+
+<!-- VERDADES CENSURADAS (Guerreiro) -->
+<div class="divider"></div>
+<section class="sec" id="verdades-sec">
+  <p class="sec-eyebrow reveal">🗡️ Verdades Não Ditas</p>
+  <h2 class="sec-title reveal r1">O que ninguém<br><em>tem coragem de cortar.</em></h2>
+  <p class="sec-intro reveal r2">
+    Toda EJ tem verdades cobertas por uma fita preta. Só um <strong>Guerreiro</strong> consegue cortá-las.
+  </p>
+  <div class="verdades reveal r2" id="verdades"></div>
+
+  <!-- rage meter -->
+  <div class="rage-meter reveal r3" id="rageMeter">
+    <div class="rage-label">
+      <span>⚡ Fúria da verdade</span>
+      <span id="rageCount">0 / 3 cortes</span>
+    </div>
+    <div class="rage-track"><div class="rage-fill" id="rageFill"></div></div>
+    <div class="rage-msg" id="rageMsg">Corte uma verdade para acumular fúria.</div>
+  </div>
+
+  <!-- dados ocultos (Ladino) -->
+  <div style="margin-top:1.8rem;" class="reveal r3">
+    <p class="sec-eyebrow" style="margin-bottom:.6rem;">🗝️ Inteligência de campo <span class="spy secret" data-secret="ladino" data-spy="verdades" title="?">👁️</span></p>
+    <div class="hidden-data">
+      <div class="hidden-row" onclick="revealData(this)">
+        <span class="hd-icon">📊</span>
+        <span class="hd-label">Taxa de follow-through (missões iniciadas vs entregues)</span>
+        <span class="hd-val" data-reveal="~34% histórico">███████</span>
+        <span class="hd-lock">🔒</span>
+      </div>
+      <div class="hidden-row" onclick="revealData(this)">
+        <span class="hd-icon">⏱️</span>
+        <span class="hd-label">Tempo médio de atraso em entregas internas</span>
+        <span class="hd-val" data-reveal="~8 dias">███████</span>
+        <span class="hd-lock">🔒</span>
+      </div>
+      <div class="hidden-row" onclick="revealData(this)">
+        <span class="hd-icon">💬</span>
+        <span class="hd-label">Desculpa mais recorrente em reuniões de rede</span>
+        <span class="hd-val" data-reveal='"Não deu tempo"'>███████</span>
+        <span class="hd-lock">🔒</span>
+      </div>
+      <div class="hidden-row" onclick="revealData(this)">
+        <span class="hd-icon">🎯</span>
+        <span class="hd-label">EJs que completaram semana 1 (base de comparação)</span>
+        <span class="hd-val" data-reveal="Orc'estra ✓">███████</span>
+        <span class="hd-lock">🔒</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FORJA -->
+<div class="divider"></div>
+<section class="sec" id="forja">
+  <p class="sec-eyebrow reveal">🔨 Mecânica da Semana</p>
+  <h2 class="sec-title reveal r1">A Forja<br><em>da Verdade</em></h2>
+  <div class="forge reveal r2">
+    <div class="forge-inner">
+      <div class="forge-head">
+        <span class="forge-emoji">🔥</span>
+        <h3>Encare o dilema. Veja o custo. Decida.</h3>
+      </div>
+      <p class="forge-sub">
+        Sem pontuação, sem resposta certa. Dilemas reais da EJ. Você escolhe a postura: a forja mostra o preço.
+        <span class="spy secret" data-secret="ladino" data-spy="forja" title="?">👁️</span>
+      </p>
+      <div class="dilemmas" id="dilemmas"></div>
+      <div class="forge-foot">
+        <div class="forge-progress">Dilemas encarados: <b id="forgeCount">0</b> / 3</div>
+        <button class="btn-commit" id="commitBtn" onclick="openCommit()">✍️ Assumir um compromisso</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLACAR -->
+<div class="divider"></div>
+<section class="sec" id="placar">
+  <p class="sec-eyebrow reveal">🏆 Placar da Semana</p>
+  <h2 class="sec-title reveal r1"><em>Semana 2</em>: pontuação</h2>
+  <div class="score-panel reveal r2">
+    <div class="sp-main"><div class="n" id="placarNum">0</div><div class="l" id="placarLbl">pontos base</div></div>
+    <div class="sp-sep"></div>
+    <div class="sp-stat"><div class="n">4×50</div><div class="l">Impacto 1</div></div>
+    <div class="sp-sep"></div>
+    <div class="sp-stat"><div class="n">4×100</div><div class="l">Impacto 2</div></div>
+    <div class="sp-sep"></div>
+    <div class="sp-stat"><div class="n">3×150</div><div class="l">Impacto 3</div></div>
+    <div class="sp-sep"></div>
+    <div class="sp-stat"><div class="n">11</div><div class="l">missões</div></div>
+  </div>
+  <div class="bonus-banner reveal r2">
+    <span class="big">2× pontos</span>
+    <span>Toda EJ que entregar <strong>até quarta-feira</strong> tem os pontos duplicados: <strong>1050 → 2100</strong>. Entregar cedo é o melhor atalho da semana.
+      <span class="spy secret" data-secret="ladino" data-spy="bonus" title="?">👁️</span>
+    </span>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-mark">ORC'<span>ESTRA</span></div>
+  <div class="foot-grito">Proibido dar desculpas até o Sábado Jr. ⚔️</div>
+  <button class="reincarnate" onclick="reincarnate()">🔁 Reencarnar (trocar de classe)</button>
+  <div class="foot-note">
+    Sábado Jr. 26 · EJ's Embaixadoras · Semana 2 · Tapa na Cara
+    <span class="spy secret" data-secret="ladino" data-spy="footer" title="?">👁️</span>
+  </div>
+</footer>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║  📌 PAINEL DE LINKS · EDITE AQUI                            ║
+   ╚══════════════════════════════════════════════════════════════╝ */
+const LINKS = {
+  'link-1_1': 'https://drive.google.com/file/d/1QENDsIJDCsblAq_JPFbhSdMY_E1QgGOh/view?usp=drive_link',
+  'dl-1_2':   'https://drive.google.com/file/d/16TzGClKbT6YlOpisAqXovv0HmpRIZbsw/view?usp=drive_link',
+  'dl-1_3':   'https://drive.google.com/file/d/1-2wk0XN9Zb1lsvBb4-BLHOj_UlIpmRPW/view?usp=drive_link',
+  'dl-1_4':   'https://drive.google.com/file/d/1bmU1QMp4t9hn9LKjVpvfcDlSymW-KpO2/view?usp=drive_link',
+  'dl-2_1':   'https://drive.google.com/file/d/122Id6opoJsT9hxUPWsKN1P5rPQ7HKlbu/view?usp=drive_link',
+  'dl-2_2':   'https://drive.google.com/file/d/1i8rdKtf0WzYwh598oBNWVDDaqQglsr8L/view?usp=drive_link',
+  'dl-2_3':   'https://drive.google.com/file/d/1vOoHBIzKoGWtJvNSJFpL5dLgLk5ApDH8/view?usp=drive_link',
+  'link-2_4': 'https://drive.google.com/file/d/16en0agLYNvEoTNCq4HKXqo5pUyTl0KVp/view?usp=drive_link',
+  'link-3_1': 'https://drive.google.com/file/d/1-MD-tvSYa2JRDrvUMQZH9n1kRrtSScTE/view?usp=drive_link',
+  'link-3_2': 'https://drive.google.com/file/d/1Fa0vnMV0k2a8QWZSx0VVZB6JnQQuG_oC/view?usp=drive_link',
+  'link-3_3': 'https://drive.google.com/file/d/1oaiVExRMLoCvcjfRo0n9XlJhmVP8QZlN/view?usp=drive_link',
+};
+
+/* ═══════════════════════════════════════════════════════════════ */
+const MISSOES = [
+  {id:'1_1',imp:1,pts:50,nome:'Status Sem Desculpa',desc:'Toda a DirEx muda o status do WhatsApp para "Proibido dar desculpas até o Sábado Jr. #SBJr26".',full:'Todos os membros da DirEx devem mudar o status do WhatsApp para: "Proibido dar desculpas até o Sábado Jr. #SBJr26".',comp:'Print dos status no grupo.',tipo:'post'},
+  {id:'1_2',imp:1,pts:50,nome:'Desculpa Proibida',desc:'Listar 3 desculpas que mais aparecem na EJ e virar cada uma em ação prática, com o porquê e o como.',full:`<br><strong>1. "Não temos tempo para pensar em inovação"</strong><br>A crença de que a inovação só deve acontecer quando os processos estiverem 100% maduros cria um ciclo de estagnação: a EJ opera apenas no modo reativo e corre o risco de se tornar obsoleta. <em>Ação prática:</em> Reestruturar o núcleo de P&D com foco em melhorias incrementais — mapear gargalos e propor soluções práticas (ex: automatizar uma planilha, testar nova ferramenta de vendas). P&D apresenta uma melhoria interna por mês.<br><br><strong>2. "Sem projeto ficamos ociosos no aprendizado"</strong><br>Cria-se dependência exclusiva do cliente externo, ignorando que a própria EJ é um espaço rico para aprendizado. Membros entram em estagnação técnica esperando o cliente ideal aparecer. <em>Ação prática:</em> Criar um "Portfólio Interno" — a diretoria mapeia dores reais da EJ (refazer site, otimizar dados, criar playbook técnico) e transforma em projetos reais. Implementar Hackathons internos: um problema real, um prazo e um mentor.<br><br><strong>3. "Estou sem tempo"</strong><br>Na maioria das vezes, o problema não é excesso de carga, mas falta de organização e priorização. <em>Ação prática:</em> Workshops práticos sobre produtividade (Matriz de Eisenhower, Pomodoro, Notion). Criar um "Padrinho de Produtividade" onde membros experientes ajudam os mais novos a planejar a semana de forma realista.`,comp:'Documento, print ou mensagem no grupo.',tipo:'pdf'},
+  {id:'1_3',imp:1,pts:50,nome:'Verdade que Ninguém Fala',desc:'Responder: "Qual problema todo mundo percebe, mas pouca gente fala?" e propor uma ação objetiva.',full:`"Não vendemos ainda por falta de sangue no olho, falta comprometimento."<br><br><em>Ação prática — Desafio "Sangue no Olho":</em> Criar um Campeonato Gamificado de Prospecção e Vendas. <strong>Pontuação:</strong> +1 pt por proposta enviada · +2 pts por reunião de fechamento · +3 pts por projeto fechado. <strong>Ranking dos Orcs:</strong> painel público atualizado diariamente, criando competição saudável e transparente. <strong>Recompensas semanais:</strong> os melhores colocados escolhem o tema do Rolestra ou viram "Destaque da Semana" nos canais. <strong>Desafios Relâmpago:</strong> mini-desafios de 2h — ex: "primeiro contato com um lead novo ganha bônus extra".`,comp:'Documento, print ou mensagem no grupo.',tipo:'pdf'},
+  {id:'1_4',imp:1,pts:50,nome:'Uma Promessa Simples',desc:'Escolher uma entrega que está sendo adiada e executar ainda nesta semana. Registrar antes e depois.',full:'Escolher uma entrega simples que está sendo adiada e executar ainda na semana. Pode ser pendência, organização, resposta, reunião, revisão, arte, proposta ou cobrança.',comp:'Print, imagem ou registro do antes e depois no grupo.',tipo:'pdf'},
+  {id:'2_1',imp:2,pts:100,nome:'Não Aguento Mais Isso',desc:'Reunir respostas: "O que a EJ faz que mais irrita ou atrasa a vida de vocês?" e propor melhoria.',full:`<strong>Respostas coletadas:</strong> "Avisar RG com pouca antecedência", "Reuniões que poderiam ser mensagem", "Falta de objetividade", "Falta de projetos", "Carga excessiva sobre a diretoria", "Falta de comunicação", "Falta de transparência", "Não há capacitações suficientes", "Diretor não se comunica com assessores", "Comunicação de última hora", "Atraso em reuniões", "Pouca prática de programação".<br><br><strong>Problema central identificado:</strong> Falta de comunicação e transparência (mencionada direta ou indiretamente em 6+ respostas).<br><br><em>Ação prática — Protocolo de Comunicação Clara:</em> Toda informação relevante postada com 48h de antecedência · Qualquer reunião com mais de 3 pessoas precisa de pauta enviada 24h antes (sem pauta = reunião cancelada) · Checklist semanal: toda segunda, cada diretoria envia resumo de 5 linhas (o que está sendo feito, principal dificuldade, o que espera dos outros) · Mentoria reversa: a cada 15 dias, um membro não-diretoria aponta uma falha de comunicação e sugere melhoria · Template padrão para comunicados internos (título, data, quem precisa agir, prazo).`,comp:'Documento ou mensagem no grupo.',tipo:'pdf'},
+  {id:'2_2',imp:2,pts:100,nome:'Quanto Custou Não Agir?',desc:'Escolher 2 categorias de perdas do último mês e estimar quanto a EJ perdeu por não agir.',full:`<strong>Categorias analisadas:</strong> Projetos não fechados e Propostas não enviadas.<br><br><strong>Projetos não fechados:</strong> Pelo menos 2 negociações avançadas perdidas por falta de ação rápida (demora no retorno, falta de documentação, proposta não finalizada a tempo). Perda estimada: Desenvolvimento R$21.000 + Design R$5.000 = <strong>R$27.000</strong>.<br><br><strong>Propostas não enviadas:</strong> 3 propostas prontas (ou quase) que nunca foram enviadas por falta de priorização ou esquecimento. Perda estimada: Consultoria R$8.000 + Concepção R$15.000 = <strong>R$23.000</strong>.<br><br><strong>Total de perda financeira estimada: R$50.000</strong> — mais de 5× o saldo atual da EJ (R$11.595,01). Além disso, ~27 horas-homem desperdiçadas (≈ 4 dias úteis de uma pessoa dedicada a vendas).<br><em>Lição:</em> A EJ não perde por falta de cliente. Perde por não agir sobre oportunidades que já estão semi-prontas.`,comp:'Documento ou mensagem no grupo.',tipo:'pdf'},
+  {id:'2_3',imp:2,pts:100,nome:'Oportunidade Perdida',desc:'Escolher uma oportunidade desperdiçada no ano: o que houve, onde falhou e o que mudar.',full:`<strong>O que aconteceu:</strong> A EJ recebeu um lead qualificado — empresa do setor de saúde querendo um site de salas virtuais. Proposta apresentada: R$45.000 (Desenvolvimento R$30k + Concepção/UX R$15k). O cliente reagiu: "Muito acima do que podemos pagar. Nosso limite é R$20 mil." A EJ tentou negociar mas a estrutura de custos não permitia baixar. Cliente fechou com agência menor por R$22.000.<br><br><strong>Onde a EJ falhou:</strong> Precificação desatualizada (tabela criada em cenário otimista, nunca revisada) · Falta de segmentação (mesmo preço para cliente grande e pequeno) · Sem cálculo do menor valor viável · "Orgulho de tabela" — a diretoria recusou flexibilizar.<br><br><strong>O que vai mudar:</strong> Revisão mensal da tabela de preços pela diretoria financeira + projetos + comercial, considerando: custo real por tipo de projeto (horas × valor/hora), preços de concorrentes locais e capacidade de pagamento do público-alvo.`,comp:'Documento ou mensagem no grupo.',tipo:'pdf'},
+  {id:'2_4',imp:2,pts:100,nome:'Rindo de Desespero',desc:'Contar de forma leve um erro/bagunça do ano: o que houve, a falha por trás e o aprendizado.',full:'Escolher um erro operacional, falha de comunicação ou situação bagunçada. Responder de forma leve e descontraída: O que aconteceu? Qual foi a falha? O que a EJ aprendeu?',comp:'Formato livre e criativo, não esqueça de mandar no grupo!',tipo:'post'},
+  {id:'3_1',imp:3,pts:150,nome:'Desculpas em Cena',desc:'Gravar um vídeo ironizando as desculpas internas que travam a EJ. Esquete, trend ou encenação.',full:'Gravar um vídeo ironizando as desculpas internas que impedem a EJ de vender, executar, bater meta ou se comprometer. Pode ser esquete, trend ou encenação rápida, desde que humorado.',comp:'Vídeo anexado no grupo.',tipo:'video'},
+  {id:'3_2',imp:3,pts:150,nome:'Futuro Sem Mudança',desc:'Carrossel ou vídeo: "Como a EJ estará daqui a 2 anos se nada mudar?", mostrando as consequências.',full:'Fazer um carrossel ou vídeo respondendo: "Como nossa EJ estará daqui a 2 anos se nada mudar?". A entrega deve mostrar as consequências de manter os mesmos erros, atrasos e desculpas.',comp:'PDF/imagem (se carrossel) ou vídeo no grupo.',tipo:'video'},
+  {id:'3_3',imp:3,pts:150,nome:'Bench Desconfortável',desc:'Comparar a EJ com uma referência: o que fazem melhor, o que aceitamos como normal e o que testar.',full:'Escolher uma EJ, organização ou empresa referência. Responder: O que eles fazem melhor que nós? O que aceitamos como normal, mas não deveríamos? Qual prática podemos testar ainda este mês?',comp:'Vídeo ou documento enviado no grupo.',tipo:'video'},
+];
+
+const TIER = {
+  1:{label:'Impacto 1', sub:'simples, rápidas e objetivas', pts:'50 pts', gem:'💧'},
+  2:{label:'Impacto 2', sub:'intermediárias, com execução prática', pts:'100 pts', gem:'🔷'},
+  3:{label:'Impacto 3', sub:'profundas: construção, produção e mobilização', pts:'150 pts', gem:'🔮'},
+};
+
+const VERDADES = [
+  'A gente reclama de atraso, mas quase ninguém assume o próprio atraso.',
+  'Tem proposta parada há semanas esperando alguém ter coragem de enviar.',
+  'Cobrar o colega virou tabu, e quem paga essa conta no fim é o cliente.',
+];
+
+const DILEMAS = [
+  {q:'O projeto vai atrasar de novo.', rune:'⏳',
+   opts:[
+     {t:'Encarar e avisar hoje', win:true, c:'Custa uma conversa difícil agora. Mas o cliente continua confiando, o time respeita o combinado e o atraso morre aqui.'},
+     {t:'Empurrar pra semana que vem', c:'Mais 7 dias de juros. A entrega vira bola de neve, o time normaliza o atraso e a próxima desculpa já nasce pronta.'},
+     {t:'Culpar o cliente', c:'Terceirizar a culpa mata o aprendizado. O cliente percebe, e a renovação do contrato vai embora junto.'},
+   ]},
+  {q:'Tem uma proposta parada esperando envio.', rune:'📨',
+   opts:[
+     {t:'Enviar ainda hoje', win:true, c:'Imperfeita e enviada vale mais que perfeita e parada. Cada dia parada é receita que a EJ deixa na mesa.'},
+     {t:'Esperar o momento perfeito', c:'O momento perfeito não existe. Enquanto espera, o cliente fecha com outro, e o "quanto custou não agir" só aumenta.'},
+     {t:'Repassar pra outra pessoa', c:'Empurrar a responsabilidade não a faz sumir. Ela volta maior, mais tarde e com menos tempo pra resolver.'},
+   ]},
+  {q:'A mesma desculpa apareceu na reunião.', rune:'🗣️',
+   opts:[
+     {t:'Encarar e cortar na hora', win:true, c:'Dói no momento, mas quebra o ciclo. Desculpa cortada na raiz não vira cultura.'},
+     {t:'Rir e seguir o assunto', c:'Rir alivia, mas valida. O que é tolerado uma vez vira padrão na próxima.'},
+     {t:'Justificar mais uma vez', c:'Mais uma justificativa empilhada. A EJ troca o crescimento pelo conforto de ter uma boa explicação.'},
+   ]},
+];
+
+const GRIMORIO = {
+  titulo:'Entrega pronta: Desculpa Proibida (rascunho do Mago)',
+  body:`<p><strong>Rascunho revelado pelo Ritual da Visão.</strong> Use como ponto de partida.</p>
+  <div class="modal-spec" style="margin-bottom:.8rem;"><span class="k">Desculpa 1</span> "Não deu tempo." → <strong>Ação:</strong> bloquear 30 min fixos por dia na agenda para a pendência, com responsável e prazo visíveis no board.</div>
+  <div class="modal-spec" style="margin-bottom:.8rem;"><span class="k">Desculpa 2</span> "Tô esperando fulano responder." → <strong>Ação:</strong> definir prazo de resposta de 24h; sem retorno, escala automática pro diretor da área.</div>
+  <div class="modal-spec"><span class="k">Desculpa 3</span> "Isso a gente vê depois." → <strong>Ação:</strong> toda pendência ganha data no momento em que nasce; "depois" não é uma data válida.</div>`
+};
+
+const SPY = {
+  verdades:'🔎 Dado de campo: o benchmark entre EJs da concentro mostra que as top performers têm um ritual de "verdade da semana" : um espaço formal para falar o que trava, sem julgamento.',
+  forja:'🔎 A Forja não pontua de propósito. O compromisso público lá no fim é o que transforma reflexão em ação de verdade.',
+  bonus:'🔎 Ladino sabe: priorize as 3 missões de Impacto 1 primeiro. Com bônus de quarta, 150 pts viram 300 com o menor esforço.',
+  footer:'🔎 A Missão 2.2 ("Quanto custou não agir?") é ouro pro pitch institucional: quantifique a perda em R$ e guarde o número.',
+};
+
+/* ═══ ESTADO ═══ */
+let CURRENT_CLASS = null;
+let checkedMissions = new Set();
+let rageCount = 0;
+
+function saveClass(c){ try{ localStorage.setItem('orc_classe_s2', c); }catch(e){ window.__orcClass = c; } }
+function loadClass(){ try{ return localStorage.getItem('orc_classe_s2'); }catch(e){ return window.__orcClass || null; } }
+
+const CLASS_META = {
+  guerreiro:{emoji:'⚔️', nome:'Guerreiro', color:'#C0492F'},
+  mago:{emoji:'🔮', nome:'Mago', color:'#7c4db4'},
+  ladino:{emoji:'🗝️', nome:'Ladino', color:'#1f6f6a'},
+};
+
+/* ═══ SVG DOS CURSORES POR CLASSE ═══ */
+const CURSOR_SVGS = {
+  guerreiro: `<g transform="translate(2,2)"><line x1="20" y1="4" x2="4" y2="20" stroke="#C0492F" stroke-width="3" stroke-linecap="round"/><line x1="4" y1="20" x2="8" y2="22" stroke="#C0492F" stroke-width="2" stroke-linecap="round"/><circle cx="20" cy="4" r="3" fill="#C0492F"/><circle cx="4" cy="20" r="2.5" fill="#e8a090"/></g>`,
+  mago: `<g transform="translate(2,2)"><polygon points="12,2 14,9 22,9 15.5,14 18,22 12,17 6,22 8.5,14 2,9 10,9" fill="none" stroke="#7c4db4" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="#7c4db4" opacity=".6"/></g>`,
+  ladino: `<g transform="translate(2,2)"><ellipse cx="12" cy="12" rx="10" ry="6" fill="none" stroke="#1f6f6a" stroke-width="1.8"/><circle cx="12" cy="12" r="3.5" fill="#1f6f6a"/><circle cx="12" cy="12" r="1.5" fill="#eaf5f4"/><line x1="2" y1="12" x2="6" y2="12" stroke="#1f6f6a" stroke-width="1.5"/><line x1="18" y1="12" x2="22" y2="12" stroke="#1f6f6a" stroke-width="1.5"/></g>`,
+};
+
+const NAV_ICONS = {
+  guerreiro: `<line x1="12" y1="2" x2="12" y2="14" stroke="#C0492F" stroke-width="2.5" stroke-linecap="round"/><polygon points="12,14 9,10 15,10" fill="#C0492F"/><line x1="8" y1="14" x2="16" y2="14" stroke="#C0492F" stroke-width="1.5"/>`,
+  mago:      `<polygon points="8,2 10,6 14,6 11,9 12,13 8,10 4,13 5,9 2,6 6,6" fill="none" stroke="#7c4db4" stroke-width="1.5" stroke-linejoin="round"/><circle cx="8" cy="6" r="1.5" fill="#7c4db4" opacity=".6"/>`,
+  ladino:    `<circle cx="8" cy="8" r="5" fill="none" stroke="#1f6f6a" stroke-width="1.5"/><circle cx="8" cy="8" r="2" fill="#1f6f6a"/><path d="M11.5 11.5 L14 14" stroke="#1f6f6a" stroke-width="1.8" stroke-linecap="round"/>`,
+};
+
+/* ═══ ESCOLHA DE CLASSE ═══ */
+/* textos da cutscene 2 por classe */
+const CUTSCENE2_TEXTS = {
+  guerreiro:{
+    emoji:'⚔️',
+    desc:'Como Guerreiro, você corta as verdades que ninguém tem coragem de falar. Procure os textos censurados e golpeie para revelar o que a EJ esconde de si mesma.'
+  },
+  mago:{
+    emoji:'🔮',
+    desc:'Como Mago, seu poder está no círculo mágico. Segure-o por alguns segundos para invocar o Ritual da Visão e desbloquear rascunhos de entrega.'
+  },
+  ladino:{
+    emoji:'🗝️',
+    desc:'Como Ladino, você enxerga o que outros não conseguem ver. Encontre os dados ocultos e segredos espalhados pela página para agir com precisão.'
+  }
+};
+
+function chooseClass(c, skipped){
+  CURRENT_CLASS = c; saveClass(c);
+  document.body.classList.remove('is-guerreiro','is-mago','is-ladino');
+  document.body.classList.add('is-'+c);
+
+  // cursor SVG
+  document.getElementById('cursor-svg').innerHTML = CURSOR_SVGS[c] || '';
+  document.getElementById('custom-cursor').style.display = 'block';
+
+  // nav badge
+  document.getElementById('navClassIcon').innerHTML = NAV_ICONS[c] || '';
+  document.getElementById('navClassName').textContent = CLASS_META[c].nome;
+
+  const cs = document.getElementById('cutscene');
+  cs.classList.add('gone');
+
+  if(!skipped){
+    sfxForClass(c);
+    // Fade cs1 then show cs2
+    setTimeout(()=>{ cs.style.display='none'; showCutscene2(c); }, 800);
+  } else {
+    document.body.classList.remove('locked');
+    setTimeout(()=>{ cs.style.display='none'; bootSite(); setupMagicCircle(); }, 800);
+  }
+}
+
+function showCutscene2(c){
+  const cs2 = document.getElementById('cutscene2');
+  document.getElementById('cut2Emoji').textContent = CUTSCENE2_TEXTS[c].emoji;
+  document.getElementById('cut2Desc').textContent = CUTSCENE2_TEXTS[c].desc;
+  cs2.style.display = 'flex';
+  document.body.classList.add('locked');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ cs2.style.opacity='1'; }));
+}
+
+function startGame(){
+  const cs2 = document.getElementById('cutscene2');
+  cs2.style.opacity = '0';
+  document.body.classList.remove('locked');
+  setTimeout(()=>{
+    cs2.style.display = 'none';
+    bootSite();
+    setupMagicCircle();
+    const c = CURRENT_CLASS;
+    setTimeout(()=>showToast(CLASS_META[c].emoji+' Você é '+CLASS_META[c].nome+'. Procure seus poderes brilhando pela página.'), 350);
+  }, 600);
+}
+
+function reincarnate(){
+  const cs = document.getElementById('cutscene');
+  cs.style.display='flex';
+  requestAnimationFrame(()=>cs.classList.remove('gone'));
+  document.body.classList.add('locked');
+  window.scrollTo({top:0, behavior:'instant'});
+}
+
+/* ═══ BOOT ═══ */
+let booted=false;
+function bootSite(){
+  if(booted) return; booted=true;
+  animCount(document.getElementById('heroScore'),1050,1600);
+}
+
+
+/* ═══ RENDER: MISSÕES ═══ */
+function linkIdFor(m){ return (m.tipo==='pdf'?'dl-':'link-')+m.id; }
+function linkLabel(tipo){ return tipo==='pdf'?'⬇ Baixar PDF':(tipo==='video'?'🔗 Ver vídeo':'🔗 Ver post'); }
+
+function renderMissions(){
+  const grid=document.getElementById('questGrid');
+  let html=''; let lastImp=0;
+  MISSOES.forEach(m=>{
+    if(m.imp!==lastImp){
+      lastImp=m.imp;
+      html+=`<div class="tier-label"><span>${TIER[m.imp].label}</span> · ${TIER[m.imp].sub} <span class="pts">(${TIER[m.imp].pts})</span></div>`;
+    }
+    const lid=linkIdFor(m);
+    html+=`
+    <div class="quest-card" id="qcard-${m.id}">
+      <div class="q-gem"><span class="ic">${TIER[m.imp].gem}</span><span class="pt">${m.pts} XP</span></div>
+      <div class="q-body">
+        <h3><span class="q-code">M${m.id.replace('_','.')}</span> ${m.nome}</h3>
+        <p>${m.desc}</p>
+      </div>
+      <div class="q-actions">
+        <button class="btn-view" onclick="openMission('${m.id}')">👁 Ver entrega</button>
+        <button class="btn-check" id="chk-${m.id}" onclick="toggleCheck('${m.id}')">☐ Marcar feita</button>
+        <a class="${m.tipo==='pdf'?'btn-dl':'btn-link'}" id="${lid}">${linkLabel(m.tipo)}</a>
+      </div>
+    </div>`;
+  });
+  grid.innerHTML=html;
+}
+
+/* ═══ CHECK DE MISSÃO ═══ */
+function toggleCheck(id){
+  const btn = document.getElementById('chk-'+id);
+  const card = document.getElementById('qcard-'+id);
+  if(checkedMissions.has(id)){
+    checkedMissions.delete(id);
+    btn.textContent='☐ Marcar feita'; btn.classList.remove('checked');
+    card.classList.remove('done');
+  } else {
+    checkedMissions.add(id);
+    btn.textContent='✓ Feita!'; btn.classList.add('checked');
+    card.classList.add('done');
+    spawnCheckParticles(btn);
+    sfx('win');
+  }
+  updateStreak();
+  updateTension();
+}
+
+function updateStreak(){
+  const n = checkedMissions.size;
+  const hud = document.getElementById('streakHud');
+  document.getElementById('streakNum').textContent = n;
+  if(n > 0){ hud.classList.remove('hidden'); } else { hud.classList.add('hidden'); }
+}
+
+function updateTension(){
+  const pct = (checkedMissions.size / MISSOES.length) * 100;
+  document.getElementById('tensionFill').style.height = pct + '%';
+}
+
+/* ═══ CÍRCULO MÁGICO DO MAGO ═══ */
+let mcSetup = false;
+function setupMagicCircle(){
+  if(mcSetup) return; mcSetup = true;
+  const circle = document.getElementById('magicCircle');
+  const ring = document.getElementById('mcRing');
+  if(!circle || !ring) return;
+
+  const HOLD_MS = 1800;
+  let holdStart = null, rafId = null;
+
+  function startHold(e){
+    if(CURRENT_CLASS !== 'mago') return;
+    e.preventDefault();
+    holdStart = Date.now();
+    sfx('magic');
+    function frame(){
+      if(!holdStart) return;
+      const pct = Math.min((Date.now() - holdStart) / HOLD_MS, 1);
+      ring.style.setProperty('--mc-p', (pct * 360) + 'deg');
+      if(pct < 1){ rafId = requestAnimationFrame(frame); }
+      else { complete(); }
+    }
+    rafId = requestAnimationFrame(frame);
+  }
+
+  function cancelHold(){
+    if(!holdStart) return;
+    holdStart = null;
+    cancelAnimationFrame(rafId);
+    let cur = parseFloat(ring.style.getPropertyValue('--mc-p')) || 0;
+    function decay(){
+      cur = Math.max(0, cur - 14);
+      ring.style.setProperty('--mc-p', cur + 'deg');
+      if(cur > 0) requestAnimationFrame(decay);
+    }
+    requestAnimationFrame(decay);
+  }
+
+  function complete(){
+    holdStart = null;
+    cancelAnimationFrame(rafId);
+    spawnSparkles(circle);
+    sfx('magic');
+    setTimeout(()=>{ ring.style.setProperty('--mc-p', '0deg'); openGrimorio(); }, 320);
+  }
+
+  circle.addEventListener('mousedown', startHold);
+  circle.addEventListener('touchstart', startHold, {passive:false});
+  document.addEventListener('mouseup', cancelHold);
+  document.addEventListener('touchend', cancelHold);
+  document.addEventListener('mouseleave', cancelHold);
+}
+
+/* ═══ RENDER: VERDADES ═══ */
+function renderVerdades(){
+  const wrap=document.getElementById('verdades');
+  wrap.innerHTML = VERDADES.map((t,i)=>`
+    <div class="censored" id="cens-${i}">
+      <div class="bar">
+        <div class="lbl">Verdade ${i+1}</div>
+        <div class="truth">${t}</div>
+        <div class="redact"></div>
+        <div class="slash"></div>
+      </div>
+      <button class="cut-btn secret" data-secret="guerreiro" data-cut="${i}" title="Cortar a verdade">🗡️</button>
+    </div>`).join('');
+}
+
+/* ═══ RAGE METER ═══ */
+function updateRage(){
+  const msgs = [
+    'Corte uma verdade para acumular fúria.',
+    'Primeira verdade cortada. A fúria começa.',
+    'Duas verdades reveladas. O tapa está chegando.',
+    '⚡ FÚRIA MÁXIMA. Nenhuma desculpa sobrevive ao Guerreiro.',
+  ];
+  const pct = (rageCount / 3) * 100;
+  document.getElementById('rageFill').style.width = pct + '%';
+  document.getElementById('rageCount').textContent = rageCount + ' / 3 cortes';
+  document.getElementById('rageMsg').textContent = msgs[Math.min(rageCount, 3)];
+  if(rageCount >= 3){
+    document.getElementById('rageMeter').style.borderColor = 'rgba(192,73,47,.4)';
+    sfx('sword'); sfx('sword');
+    setTimeout(()=>showToast('⚡ FÚRIA MÁXIMA. Todas as verdades cortadas. A EJ não tem mais onde se esconder.'), 300);
+  }
+}
+
+/* ═══ DADOS OCULTOS (Ladino) ═══ */
+function revealData(row){
+  if(CURRENT_CLASS !== 'ladino'){
+    showToast('🔒 Só um Ladino enxerga estes dados. Reencarne lá no rodapé.');
+    return;
+  }
+  const valEl = row.querySelector('.hd-val');
+  if(valEl.style.filter === 'blur(0px)') return; // já revelado
+  valEl.style.filter = 'blur(0px)';
+  valEl.textContent = valEl.dataset.reveal;
+  sfx('lock');
+  row.querySelector('.hd-lock').style.opacity = '0';
+}
+
+/* ═══ RENDER: FORJA ═══ */
+let forgeAnswered = new Set();
+function renderForja(){
+  const wrap=document.getElementById('dilemmas');
+  wrap.innerHTML = DILEMAS.map((d,di)=>`
+    <div class="dilemma">
+      <div class="dilemma-q"><span class="rune">${d.rune}</span>${d.q}</div>
+      <div class="postures">
+        ${d.opts.map((o,oi)=>`<button class="posture ${o.win?'act':''}" data-d="${di}" data-o="${oi}">${o.t}</button>`).join('')}
+      </div>
+      <div class="consequence" id="cons-${di}"></div>
+    </div>`).join('');
+  wrap.querySelectorAll('.posture').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const di=+btn.dataset.d, oi=+btn.dataset.o;
+      const d=DILEMAS[di], o=d.opts[oi];
+      wrap.querySelectorAll(`.posture[data-d="${di}"]`).forEach(b=>{b.classList.remove('chosen');b.classList.add('dim');});
+      btn.classList.add('chosen'); btn.classList.remove('dim');
+      const cons=document.getElementById('cons-'+di);
+      cons.className='consequence show '+(o.win?'win':'cost');
+      cons.innerHTML=`<span class="cost-tag">${o.win?'✓ O caminho do agir':'⚠ O custo de não agir'}</span>${o.c}`;
+      forgeAnswered.add(di);
+      document.getElementById('forgeCount').textContent=forgeAnswered.size;
+      if(forgeAnswered.size>=1){ document.getElementById('commitBtn').classList.add('ready'); }
+      sfx(o.win?'win':'cost');
+    });
+  });
+}
+
+/* ═══ MODAIS ═══ */
+const overlay=document.getElementById('overlay');
+const modalContent=document.getElementById('modalContent');
+function openHTML(html){ modalContent.innerHTML=html; overlay.classList.add('open'); document.body.style.overflow='hidden'; }
+function closeModal(e){ overlay.classList.remove('open'); document.body.style.overflow=''; }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ overlay.classList.remove('open'); document.body.style.overflow=''; }});
+
+function openMission(id){
+  const m=MISSOES.find(x=>x.id===id);
+  const lid=linkIdFor(m);
+  const hasLink = LINKS[lid] && LINKS[lid].trim()!=='';
+  const statusBanner = hasLink
+    ? `<div class="modal-pending" style="background:rgba(46,182,0,.07);border-color:rgba(46,182,0,.3);">✅ <div><strong>Entrega publicada.</strong> Use o botão abaixo para acessar o documento/post entregue.</div></div>`
+    : `<div class="modal-pending">⏳ <div><strong>Entrega ainda não publicada.</strong> Use o botão de PDF/post/vídeo no cartão para anexar o link quando produzir.</div></div>`;
+  openHTML(`
+    <div class="modal-tag">${TIER[m.imp].label} · ${m.pts} pts</div>
+    <h2>M${m.id.replace('_','.')} · ${m.nome}</h2>
+    <div class="modal-body">
+      ${statusBanner}
+      <div class="modal-spec" style="margin-bottom:.8rem;"><span class="k">O que fazer</span>${m.full}</div>
+      <div class="modal-spec"><span class="k">Comprovação</span>${m.comp}</div>
+    </div>`);
+}
+
+function openGrimorio(){
+  openHTML(`<div class="modal-tag" style="background:#6a4bb0">🔮 Ritual da Visão</div>
+    <h2>${GRIMORIO.titulo}</h2><div class="modal-body">${GRIMORIO.body}</div>`);
+  sfx('magic');
+}
+
+function openCommit(){
+  if(!document.getElementById('commitBtn').classList.contains('ready')) return;
+  openHTML(`
+    <div class="modal-tag" style="background:var(--gold)">✍️ Compromisso público</div>
+    <h2>Transforme reflexão em ação</h2>
+    <div class="modal-body">
+      <p>Edite o texto abaixo, copie e cole no grupo. Compromisso dito em voz alta vira cobrança, e cobrança vira entrega.</p>
+      <textarea class="commit-area" id="commitText">Eu, da Orc'estra, me comprometo a [escreva a ação concreta] até [data]. Sem desculpa. Se eu não cumprir, o time pode me cobrar. #SBJr26 #TapaNaCara</textarea>
+      <button class="btn-copy" onclick="copyCommit()">📋 Copiar compromisso</button>
+    </div>`);
+}
+
+function copyCommit(){
+  const t=document.getElementById('commitText');
+  t.select(); t.setSelectionRange(0,99999);
+  try{ navigator.clipboard.writeText(t.value); showToast('✓ Compromisso copiado. Agora é só colar no grupo.'); }
+  catch(e){ document.execCommand('copy'); showToast('✓ Compromisso copiado.'); }
+  sfx('win');
+}
+
+/* ═══ SEGREDOS ═══ */
+document.addEventListener('click',e=>{
+  const sec=e.target.closest('.secret');
+  if(!sec) return;
+  const need=sec.dataset.secret;
+  if(CURRENT_CLASS!==need){
+    showToast('🔒 Só um '+CLASS_META[need].nome+' desperta este segredo. Reencarne lá no rodapé para trocar de classe.');
+    return;
+  }
+  popEl(sec);
+  if(need==='guerreiro' && sec.dataset.cut!==undefined){
+    const idx = +sec.dataset.cut;
+    document.getElementById('cens-'+idx).classList.add('cut');
+    if(!document.getElementById('cens-'+idx).dataset.counted){
+      document.getElementById('cens-'+idx).dataset.counted='1';
+      rageCount++; updateRage();
+    }
+    sfx('sword');
+  } else if(need==='mago' && sec.dataset.grimorio!==undefined){
+    sec.classList.add('cast'); setTimeout(()=>sec.classList.remove('cast'),650);
+    spawnSparkles(sec); sfx('magic');
+    setTimeout(()=>openGrimorio(), 240);
+  } else if(need==='ladino' && sec.dataset.spy!==undefined){
+    showPopover(sec, SPY[sec.dataset.spy]); sfx('lock');
+  }
+});
+
+/* ═══ PARTÍCULAS DE CHECK ═══ */
+function spawnCheckParticles(el){
+  const r=el.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2;
+  for(let i=0;i<10;i++){
+    const s=document.createElement('div'); s.className='spark';
+    s.style.left=cx+'px'; s.style.top=cy+'px';
+    s.style.background = i%2 ? '#2EB600' : '#C8912F';
+    s.style.width='7px'; s.style.height='7px';
+    document.body.appendChild(s);
+    const ang=Math.random()*Math.PI*2, dist=24+Math.random()*40;
+    s.animate(
+      [{transform:'translate(-50%,-50%) scale(1)',opacity:1},
+       {transform:`translate(${Math.cos(ang)*dist-3.5}px,${Math.sin(ang)*dist-3.5}px) scale(0)`,opacity:0}],
+      {duration:500+Math.random()*200, easing:'cubic-bezier(.16,1,.3,1)'});
+    setTimeout(()=>s.remove(),750);
+  }
+}
+
+/* ═══ TOAST ═══ */
+let toastTimer=null;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),4200);
+}
+
+function popEl(el){ el.classList.add('pop'); setTimeout(()=>el.classList.remove('pop'),430); }
+
+/* ═══ FAÍSCAS DO MAGO ═══ */
+function spawnSparkles(el){
+  const r=el.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2;
+  for(let i=0;i<16;i++){
+    const s=document.createElement('div'); s.className='spark';
+    s.style.left=cx+'px'; s.style.top=cy+'px';
+    s.style.background = i%2 ? '#a07bd6' : '#c8a6ee';
+    document.body.appendChild(s);
+    const ang=Math.random()*Math.PI*2, dist=36+Math.random()*56;
+    s.animate(
+      [{transform:'translate(-50%,-50%) scale(1)',opacity:1},
+       {transform:`translate(${Math.cos(ang)*dist-4}px,${Math.sin(ang)*dist-4}px) scale(0)`,opacity:0}],
+      {duration:620+Math.random()*320, easing:'cubic-bezier(.16,1,.3,1)'});
+    setTimeout(()=>s.remove(),980);
+  }
+}
+
+/* ═══ POPOVER (Ladino) ═══ */
+let activePop=null;
+function showPopover(target,msg){
+  if(activePop){ activePop.remove(); activePop=null; }
+  const p=document.createElement('div'); p.className='popover'; p.textContent=msg;
+  document.body.appendChild(p);
+  const r=target.getBoundingClientRect();
+  let left=Math.min(Math.max(8, r.left-12), innerWidth-280-8);
+  let top=r.top - 120;
+  if(top<8){ top=r.bottom+12; p.style.setProperty('--arrow-top','auto'); }
+  p.style.left=left+'px'; p.style.top=top+'px';
+  requestAnimationFrame(()=>p.classList.add('show'));
+  activePop=p;
+  p._t=setTimeout(()=>{ p.classList.remove('show'); const q=p; setTimeout(()=>q.remove(),300); if(activePop===p)activePop=null; },6000);
+}
+addEventListener('scroll',()=>{ if(activePop){ const q=activePop; activePop=null; q.classList.remove('show'); setTimeout(()=>q.remove(),250); } },{passive:true});
+
+/* ═══ SCORE TOGGLE ═══ */
+document.getElementById('scoreToggle').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#scoreToggle button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  const bonus=b.dataset.mode==='bonus';
+  animCount(document.getElementById('heroScore'), bonus?2100:1050, 800);
+  document.getElementById('heroScoreLbl').innerHTML = bonus
+    ? 'pontos com bônus · <b>entregas até quarta</b>' : 'pontos máximos · 11 missões';
+});
+
+/* ═══ CONTADOR ═══ */
+function animCount(el,target,dur=1400){
+  let s=null; const from=parseInt(el.textContent.replace(/\D/g,''))||0;
+  function step(ts){ if(!s)s=ts; const p=Math.min((ts-s)/dur,1); const e=1-Math.pow(1-p,4);
+    el.textContent=Math.round(from+(target-from)*e); if(p<1)requestAnimationFrame(step); else el.textContent=target; }
+  requestAnimationFrame(step);
+}
+
+/* ═══ CURSOR ═══ */
+const curEl=document.getElementById('custom-cursor'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  curEl.style.left=mx+'px';curEl.style.top=my+'px';
+});
+(function ringLoop(){rx+=(mx-rx)*.16;ry+=(my-ry)*.16;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(ringLoop);})();
+
+function bindCursor(){
+  document.querySelectorAll('a,button,.quest-card,.class-card,.posture,.secret,.hidden-row').forEach(el=>{
+    el.addEventListener('mouseenter',()=>document.body.classList.add('hovering'));
+    el.addEventListener('mouseleave',()=>document.body.classList.remove('hovering'));
+  });
+}
+
+/* ═══ PARTÍCULAS ═══ */
+const canvas=document.getElementById('particles'),ctx=canvas.getContext('2d');
+let W,H,pts=[];
+function resize(){W=canvas.width=innerWidth;H=canvas.height=innerHeight;}
+resize(); addEventListener('resize',resize);
+class P{constructor(){this.reset();}reset(){this.x=Math.random()*W;this.y=Math.random()*H;this.r=Math.random()*1.6+.4;this.vx=(Math.random()-.5)*.25;this.vy=(Math.random()-.5)*.25;this.a=Math.random()*.4+.15;}
+  draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,7);ctx.fillStyle=`rgba(46,139,87,${this.a})`;ctx.fill();}
+  upd(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>W||this.y<0||this.y>H)this.reset();}}
+for(let i=0;i<60;i++)pts.push(new P());
+(function loop(){ctx.clearRect(0,0,W,H);
+  for(let i=0;i<pts.length;i++){for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.hypot(dx,dy);
+    if(d<110){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle=`rgba(46,139,87,${.08*(1-d/110)})`;ctx.lineWidth=.5;ctx.stroke();}}}
+  pts.forEach(p=>{p.upd();p.draw();});requestAnimationFrame(loop);})();
+
+/* ═══ SCROLL REVEAL ═══ */
+const revObs=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){en.target.classList.add('visible');revObs.unobserve(en.target);}}),{threshold:.12});
+const placarObs=new IntersectionObserver(es=>{
+  if(es[0].isIntersecting){ animCount(document.getElementById('placarNum'),1050,1400); placarObs.disconnect(); }
+},{threshold:.4});
+
+/* ═══ ÁUDIO ═══ */
+let audioCtx=null, masterGain=null, anthemTimers=[], anthemOn=false;
+const BEAT=0.5;
+const N={C4:261.63,D4:293.66,Eb4:311.13,F4:349.23,G4:392.00,Ab4:415.30,Bb4:466.16,C5:523.25,D5:587.33,Eb5:622.25,G5:783.99};
+const MELODY=[
+  [N.C4,0,0.333],[N.C4,0.333,0.333],[N.Eb4,0.666,0.333,0.28],
+  [N.C4,1,0.333],[N.C4,1.333,0.333],[N.Eb4,1.666,0.333,0.28],
+  [N.C4,2,0.333],[N.C4,2.333,0.333],[N.C4,2.666,0.333],
+  [N.C4,3,0.2],[N.C4,3.2,0.2],[N.Eb4,3.4,0.2],[N.G4,3.6,0.4,0.3],
+  [N.C4,4,0.333],[N.C4,4.333,0.333],[N.Eb4,4.666,0.333],
+  [N.C4,5,0.333],[N.C4,5.333,0.333],[N.Eb4,5.666,0.333],
+  [N.C4,6,0.5],[N.C4,6.5,0.166],[N.C4,6.666,0.166],[N.Eb4,6.833,0.167],[N.Eb4,7,0.5],[N.G4,7.5,0.5,0.3],
+  [N.C4,8,0.5],[N.C4,8.5,0.5],[N.Eb4,9,0.5],[N.G4,9.5,0.5,0.3],
+  [N.C4,10,0.5],[N.C4,10.5,0.5],[N.Eb4,11,0.5],[N.G4,11.5,0.5,0.3],
+  [N.C4,12,0.5],[N.C4,12.5,0.5],[N.Eb4,13,0.5],[N.G4,13.5,0.5,0.3],
+  [N.C4,14,0.5],[N.C4,14.5,0.5],[N.Eb4,15,0.5],[N.G4,15.5,0.5,0.3],
+  [N.C4,16,0.5],[N.Eb4,16.5,0.5,0.26],
+  [N.C4,17,0.2],[N.C4,17.2,0.2],[N.C4,17.4,0.2],[N.Eb4,17.6,0.2],[N.Eb4,17.8,0.2],
+  [N.C4,18,0.25],[N.C4,18.25,0.25],[N.C4,18.5,0.25],[N.C4,18.75,0.25],
+  [N.C4,19,0.5],[N.C4,19.5,0.25],[N.Eb4,19.75,0.25],[N.G4,20,1,0.3],
+  [N.C4,21,1.5,0.32],[N.C4,22.5,1.5,0.32],[N.C4,24,1.5,0.32],[N.C4,25.5,1.5,0.32]
+];
+const BASS=[
+  [130.81,0,2],[130.81,2,2],[130.81,4,2],[103.83,6,2],[130.81,8,2],[98.00,10,2],
+  [130.81,12,2],[155.56,14,2],[130.81,16,2],[103.83,18,1],[116.54,19,1],[116.54,20,1],
+  [130.81,21,1.5],[130.81,22.5,1.5],[65.41,24,1.5],[130.81,25.5,1.5]
+];
+const TOTAL_BEATS=27;
+function initAudio(){ if(audioCtx)return; const AC=window.AudioContext||window.webkitAudioContext; audioCtx=new AC(); masterGain=audioCtx.createGain(); masterGain.gain.value=0.3; masterGain.connect(audioCtx.destination); }
+function tone(freq,start,dur,type,vol){ const o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.type=type;o.frequency.value=freq; const t0=audioCtx.currentTime+start;
+  g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(vol,t0+0.02); g.gain.setValueAtTime(vol,t0+dur*0.7); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  o.connect(g);g.connect(masterGain);o.start(t0);o.stop(t0+dur+0.05); }
+function kick(start){ const o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.type='sine'; const t0=audioCtx.currentTime+start;
+  o.frequency.setValueAtTime(150,t0);o.frequency.exponentialRampToValueAtTime(45,t0+0.12); g.gain.setValueAtTime(0.5,t0);g.gain.exponentialRampToValueAtTime(0.001,t0+0.16);
+  o.connect(g);g.connect(masterGain);o.start(t0);o.stop(t0+0.18); }
+function scheduleAnthem(){ MELODY.forEach(([f,b,d,v])=>tone(f,b*BEAT,d*BEAT*0.95,'square',v||0.20)); BASS.forEach(([f,b,d])=>tone(f,b*BEAT,d*BEAT*0.98,'triangle',0.15)); for(let b=0;b<TOTAL_BEATS;b+=2)kick(b*BEAT); }
+document.getElementById('soundToggle').addEventListener('click',function(){
+  initAudio(); if(audioCtx.state==='suspended')audioCtx.resume();
+  if(anthemOn){ anthemTimers.forEach(clearTimeout); anthemTimers=[]; try{masterGain.gain.setTargetAtTime(0,audioCtx.currentTime,0.08);}catch(e){} anthemOn=false; this.textContent='🔊'; return; }
+  masterGain.gain.value=0.3; scheduleAnthem(); anthemOn=true; this.textContent='🔈';
+  const self=this; anthemTimers.push(setTimeout(()=>{anthemOn=false;self.textContent='🔊';},(TOTAL_BEATS*BEAT*1000)+300));
+});
+function sfx(kind){
+  initAudio(); if(audioCtx.state==='suspended')audioCtx.resume();
+  if(kind==='sword'){
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sawtooth';
+    const t=audioCtx.currentTime;o.frequency.setValueAtTime(820,t);o.frequency.exponentialRampToValueAtTime(120,t+0.18);
+    g.gain.setValueAtTime(0.22,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.2);o.connect(g);g.connect(masterGain);o.start(t);o.stop(t+0.22);
+  } else if(kind==='magic'){
+    [523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f,i*0.08,0.3,'triangle',0.16));
+  } else if(kind==='lock'){
+    tone(1400,0,0.04,'square',0.12); tone(1700,0.09,0.04,'square',0.12); tone(220,0.2,0.12,'square',0.14);
+  } else if(kind==='win'){
+    tone(523.25,0,0.1,'square',0.16); tone(783.99,0.1,0.18,'square',0.16);
+  } else if(kind==='cost'){
+    tone(196,0,0.22,'sawtooth',0.13);
+  }
+}
+function sfxForClass(c){ sfx(c==='guerreiro'?'sword':(c==='mago'?'magic':'lock')); }
+
+/* ═══ LINKS ═══ */
+function wireLinks(){
+  Object.entries(LINKS).forEach(([id,url])=>{
+    const el=document.getElementById(id); if(!el)return;
+    const isDl=id.startsWith('dl-');
+    if(url && url.trim()!==''){
+      el.classList.add('ready'); el.classList.remove('pending'); el.setAttribute('href',url);
+      if(isDl){ el.setAttribute('download',''); } else { el.setAttribute('target','_blank'); el.setAttribute('rel','noopener'); }
+    } else {
+      el.classList.add('pending'); el.classList.remove('ready'); el.removeAttribute('href');
+      el.textContent = isDl ? '⬇ PDF em breve' : '🔗 Em breve';
+    }
+  });
+}
+
+/* ═══ INIT ═══ */
+renderMissions();
+renderVerdades();
+renderForja();
+wireLinks();
+bindCursor();
+document.querySelectorAll('.reveal').forEach(el=>revObs.observe(el));
+placarObs.observe(document.getElementById('placarNum'));
+bindCursor();
+
+// check saved class
+const saved = loadClass();
+if(saved && CLASS_META[saved]){
+  // show site directly if class saved
+  const cs=document.getElementById('cutscene');
+  cs.style.display='none'; document.body.classList.remove('locked');
+  chooseClass(saved, true);
+  bootSite();
+  setupMagicCircle();
+}
+</script>
+</body>
+</html>
